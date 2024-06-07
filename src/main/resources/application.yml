@@ -1,0 +1,5 @@
+spring
+application.name=user
+logging.level.org.springframework.data.mongodb.core.MongoTemplate=DEBUG
+spring.data.mongodb.database=users
+spring.data.mongodb.uri=mongodb+srv://${USER_DB}:${PASSWORD_DB}@${ATLAS_CLUSTER}/?retryWrites=true&w=majority&appName=AtlasCluster
