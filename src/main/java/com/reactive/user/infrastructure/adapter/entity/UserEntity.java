@@ -8,10 +8,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "users")
 @Getter
 @Setter
-public class User {
+public class UserEntity {
 
     @Id
-    private String uuid;
+    private Long id;
     private String email;
     private String name;
     private String phone;
