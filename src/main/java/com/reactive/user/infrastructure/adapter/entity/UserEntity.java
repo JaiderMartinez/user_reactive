@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @Setter
 public class UserEntity {
-
     @Id
     private Long id;
     private String email;

@@ -1,7 +1,6 @@
-package com.reactive.user.infrastructure.dto;
+package com.reactive.user.infrastructure.dto.response;
 
-public record UserDto(
-        String id,
+public record UserResponseDto(
         String email,
         String name,
         String phone,
