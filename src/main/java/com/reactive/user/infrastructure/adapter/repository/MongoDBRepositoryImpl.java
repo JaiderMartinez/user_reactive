@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Repository
@@ -22,5 +23,35 @@ public class MongoDBRepositoryImpl implements UserService {
         log.info(LOGGER_PREFIX + "[getUsers] request");
         return userDao.findAll()
                 .map(userMapper::toModel);
+    }
+
+    @Override
+    public Mono<User> saveUser(final User user) {
+        log.info(LOGGER_PREFIX + "[saveUser] request {}", user);
+        return userDao.save(userMapper.toEntity(user))
+                .map(userMapper::toModel)
+                .doOnSuccess(userModel -> log.info(LOGGER_PREFIX + "[saveUser] response {}", userModel));
+    }
+
+    @Override
+    public Mono<Boolean> existEmail(final String email) {
+        log.info(LOGGER_PREFIX + "[existEmail] request {}", email);
+        return userDao.existsByEmail(email)
+                .doOnSuccess(existsEmail -> log.info(LOGGER_PREFIX + "[existEmail] response {}", existsEmail));
+    }
+
+    @Override
+    public Mono<User> getUserByName(String nameUser) {
+        log.info(LOGGER_PREFIX + "[getUserByName] request {}", nameUser);
+        return userDao.findByName(nameUser)
+                .map(userMapper::toModel)
+                .doOnSuccess(user -> log.info(LOGGER_PREFIX + "[getUserByName] response {}", user));
+    }
+
+    @Override
+    public Mono<Void> deleteUser(String nameUser, String email) {
+        log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email);
+        return userDao.deleteByNameAndEmail(nameUser, email)
+                .doOnSuccess(voidFlow -> log.info(LOGGER_PREFIX + "[deleteUser] response void"));
     }
 }
