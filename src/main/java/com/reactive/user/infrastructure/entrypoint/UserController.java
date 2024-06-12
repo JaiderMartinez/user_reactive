@@ -38,16 +38,16 @@ public class UserController {
 
     @GetMapping
     public Flux<UserResponseDto> getUser() {
-        log.info(LOGGER_PREFIX + "[getUser] request");
         return this.userQueryHandler.execute()
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[getUser] request"))
                 .map(this.userMapper::toDto);
     }
 
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public Mono<UserCreatedResponseDto> saveUser(@RequestBody final UserRequestDto userRequestDto) {
-        log.info(LOGGER_PREFIX + "[saveUser] request {}", userRequestDto);
         return this.userCreatorCommand.execute(this.userMapper.toModel(userRequestDto))
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[saveUser] request {}", userRequestDto))
                 .map(this.userMapper::toCreatedResponseDto)
                 .doOnSuccess(userCreatedResponseDto ->
                         log.info(LOGGER_PREFIX + "[saveUser] response {}", userCreatedResponseDto));
@@ -56,8 +56,8 @@ public class UserController {
     @PatchMapping
     public Mono<Void> updateUserFields(@RequestBody final UserPartialUpdateRequestDto userPartialUpdateDto,
                                        @RequestParam(value = "name") final String nameUser) {
-        log.info(LOGGER_PREFIX + "[updateUser] request {}, {}", nameUser, userPartialUpdateDto);
         return this.userPartialUpdateCommand.execute(this.userMapper.toModel(userPartialUpdateDto, nameUser))
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[updateUser] request {}, {}", nameUser, userPartialUpdateDto))
                 .doOnSuccess(voidFlow ->
                         log.info(LOGGER_PREFIX + "[updateUser] response void"));
     }
@@ -65,8 +65,8 @@ public class UserController {
     @DeleteMapping
     public Mono<Void> deleteUser(@RequestParam(value = "name") final String nameUser,
                                  @RequestParam(value = "email") final String email) {
-        log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email);
         return this.userDeleteCommand.execute(nameUser, email)
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email))
                 .doOnSuccess(voidFlow ->
                         log.info(LOGGER_PREFIX + "[deleteUser] response void"));
     }

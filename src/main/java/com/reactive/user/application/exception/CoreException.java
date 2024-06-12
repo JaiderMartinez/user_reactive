@@ -7,8 +7,14 @@ import lombok.Getter;
 public class CoreException extends RuntimeException {
     private final CodeException codeException;
 
-    public CoreException(final CodeException codeException, final Exception exception) {
-        super(codeException.getMessage(), exception);
+    protected CoreException(final CodeException codeException, final Exception exception, final String... fields) {
+        super(getMessage(codeException, fields), exception);
         this.codeException = codeException;
+    }
+
+    private static String getMessage(final CodeException codeException, final String... fields) {
+        return fields.length > 0
+                ? String.format(codeException.getMessage(), (Object[]) fields)
+                : codeException.getMessage();
     }
 }

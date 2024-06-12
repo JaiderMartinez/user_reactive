@@ -33,30 +33,30 @@ public class UserUseCase {
                     if (Boolean.TRUE.equals(existsEmail)) {
                         log.error(LOGGER_PREFIX + "[validateEmail] email already exists");
                         return Mono.error(
-                                new UserUseCaseException(CodeException.EMAIL_ALREADY_EXISTS, null));
+                                new UserUseCaseException(CodeException.INVALID_PARAMETERS, null, "email"));
                     }
                     return Mono.empty();
                 });
     }
 
-    private void validateName(final User user) {
+    private void validateName(final User user) {//TODO No usar throw
         if (!user.isValidName()) {
             log.error(LOGGER_PREFIX + "[validateName] name user invalid");
-            throw new UserUseCaseException(CodeException.NAME_USER_INVALID, null);
+            throw new UserUseCaseException(CodeException.INVALID_PARAMETERS, null, "name");
         }
     }
 
     private void validateEmail(final User user) {
         if (!user.isValidEmail()) {
             log.error(LOGGER_PREFIX + "[validateEmail] email user invalid");
-            throw new UserUseCaseException(CodeException.EMAIL_USER_INVALID, null);
+            throw new UserUseCaseException(CodeException.INVALID_PARAMETERS, null, "email");
         }
     }
 
     private void validatePhone(final User user) {
         if (!user.isValidPhone()) {
             log.error(LOGGER_PREFIX + "[validatePhone] phone user invalid");
-            throw new UserUseCaseException(CodeException.PHONE_USER_INVALID, null);
+            throw new UserUseCaseException(CodeException.INVALID_PARAMETERS, null, "phone");
         }
     }
 

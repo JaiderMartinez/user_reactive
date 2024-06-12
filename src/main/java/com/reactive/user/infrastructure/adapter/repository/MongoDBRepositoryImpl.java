@@ -22,30 +22,30 @@ public class MongoDBRepositoryImpl implements UserService {
 
     @Override
     public Flux<User> getUsers() {
-        log.info(LOGGER_PREFIX + "[getUsers] request");
         return this.userDao.findAll()
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[getUsers] request"))
                 .map(this.userMapper::toModel);
     }
 
     @Override
     public Mono<User> saveUser(final User user) {
-        log.info(LOGGER_PREFIX + "[saveUser] request {}", user);
         return this.userDao.save(this.userMapper.toEntity(user))
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[saveUser] request {}", user))
                 .doOnSuccess(userModel -> log.info(LOGGER_PREFIX + "[saveUser] response {}", userModel))
                 .map(this.userMapper::toModel);
     }
 
     @Override
     public Mono<Boolean> existEmail(final String email) {
-        log.info(LOGGER_PREFIX + "[existEmail] request {}", email);
         return this.userDao.existsByEmail(email)
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[existEmail] request {}", email))
                 .doOnSuccess(existsEmail -> log.info(LOGGER_PREFIX + "[existEmail] response {}", existsEmail));
     }
 
     @Override
     public Mono<User> getUserByName(final String nameUser) {
-        log.info(LOGGER_PREFIX + "[getUserByName] request {}", nameUser);
         return this.userDao.findByName(nameUser)
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[getUserByName] request {}", nameUser))
                 .switchIfEmpty(
                         Mono.error(() -> {
                             log.error(LOGGER_PREFIX + "[getUserByName] No users found");
@@ -58,8 +58,8 @@ public class MongoDBRepositoryImpl implements UserService {
 
     @Override
     public Mono<Void> deleteUser(final String nameUser, final String email) {
-        log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email);
         return this.userDao.deleteByNameAndEmail(nameUser, email)
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email))
                 .doOnSuccess(voidFlow -> log.info(LOGGER_PREFIX + "[deleteUser] response void"));
     }
 }
