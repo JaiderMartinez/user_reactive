@@ -1,6 +1,8 @@
 package com.reactive.user.infrastructure.adapter.repository;
 
+import com.reactive.user.application.exception.RepositoryException;
 import com.reactive.user.application.service.UserService;
+import com.reactive.user.domain.exception.CodeException;
 import com.reactive.user.domain.model.User;
 import com.reactive.user.infrastructure.adapter.dao.UserDao;
 import com.reactive.user.infrastructure.mapper.UserMapper;
@@ -21,37 +23,43 @@ public class MongoDBRepositoryImpl implements UserService {
     @Override
     public Flux<User> getUsers() {
         log.info(LOGGER_PREFIX + "[getUsers] request");
-        return userDao.findAll()
-                .map(userMapper::toModel);
+        return this.userDao.findAll()
+                .map(this.userMapper::toModel);
     }
 
     @Override
     public Mono<User> saveUser(final User user) {
         log.info(LOGGER_PREFIX + "[saveUser] request {}", user);
-        return userDao.save(userMapper.toEntity(user))
-                .map(userMapper::toModel)
-                .doOnSuccess(userModel -> log.info(LOGGER_PREFIX + "[saveUser] response {}", userModel));
+        return this.userDao.save(this.userMapper.toEntity(user))
+                .doOnSuccess(userModel -> log.info(LOGGER_PREFIX + "[saveUser] response {}", userModel))
+                .map(this.userMapper::toModel);
     }
 
     @Override
     public Mono<Boolean> existEmail(final String email) {
         log.info(LOGGER_PREFIX + "[existEmail] request {}", email);
-        return userDao.existsByEmail(email)
+        return this.userDao.existsByEmail(email)
                 .doOnSuccess(existsEmail -> log.info(LOGGER_PREFIX + "[existEmail] response {}", existsEmail));
     }
 
     @Override
-    public Mono<User> getUserByName(String nameUser) {
+    public Mono<User> getUserByName(final String nameUser) {
         log.info(LOGGER_PREFIX + "[getUserByName] request {}", nameUser);
-        return userDao.findByName(nameUser)
-                .map(userMapper::toModel)
-                .doOnSuccess(user -> log.info(LOGGER_PREFIX + "[getUserByName] response {}", user));
+        return this.userDao.findByName(nameUser)
+                .switchIfEmpty(
+                        Mono.error(() -> {
+                            log.error(LOGGER_PREFIX + "[getUserByName] No users found");
+                            return new RepositoryException(CodeException.USER_NOT_FOUND, null);
+                        })
+                )
+                .doOnSuccess(user -> log.info(LOGGER_PREFIX + "[getUserByName] response {}", user))
+                .map(this.userMapper::toModel);
     }
 
     @Override
-    public Mono<Void> deleteUser(String nameUser, String email) {
+    public Mono<Void> deleteUser(final String nameUser, final String email) {
         log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email);
-        return userDao.deleteByNameAndEmail(nameUser, email)
+        return this.userDao.deleteByNameAndEmail(nameUser, email)
                 .doOnSuccess(voidFlow -> log.info(LOGGER_PREFIX + "[deleteUser] response void"));
     }
 }

@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 public class UserPartialUpdateCommand {
     private final UserUseCase userUseCase;
 
-    public Mono<Void> execute(final User user, final String nameUser) {
-        return userUseCase.partialUpdate(user, nameUser);
+    public Mono<Void> execute(final User user) {
+        return this.userUseCase.updateUserFields(user);
     }
 }

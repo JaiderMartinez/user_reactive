@@ -9,6 +9,6 @@ public class UserDeleteCommand {
     private final UserUseCase userUseCase;
 
     public Mono<Void> execute(final String nameUser, final String email) {
-        return userUseCase.deleteUser(nameUser, email);
+        return this.userUseCase.deleteUser(nameUser, email);
     }
 }

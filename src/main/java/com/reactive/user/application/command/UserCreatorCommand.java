@@ -10,6 +10,6 @@ public class UserCreatorCommand {
     private final UserUseCase userUseCase;
 
     public Mono<User> execute(final User user) {
-        return userUseCase.saveUser(user);
+        return this.userUseCase.saveUser(user);
     }
 }

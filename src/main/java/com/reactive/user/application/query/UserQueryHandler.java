@@ -10,6 +10,6 @@ public class UserQueryHandler {
     private final UserUseCase userUseCase;
 
     public Flux<User> execute() {
-        return userUseCase.getUsers();
+        return this.userUseCase.getUsers();
     }
 }
