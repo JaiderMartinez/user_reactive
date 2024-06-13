@@ -2,9 +2,9 @@ package com.reactive.user.infrastructure.entrypoint;
 
 import com.reactive.user.application.command.UserCreatorCommand;
 import com.reactive.user.application.command.UserDeleteCommand;
-import com.reactive.user.application.command.UserPartialUpdateCommand;
+import com.reactive.user.application.command.UserFieldUpdateCommand;
 import com.reactive.user.application.query.UserQueryHandler;
-import com.reactive.user.infrastructure.dto.request.UserPartialUpdateRequestDto;
+import com.reactive.user.infrastructure.dto.request.UserFieldUpdateRequestDto;
 import com.reactive.user.infrastructure.dto.request.UserRequestDto;
 import com.reactive.user.infrastructure.dto.response.UserCreatedResponseDto;
 import com.reactive.user.infrastructure.dto.response.UserResponseDto;
@@ -32,15 +32,16 @@ public class UserController {
     private static final String LOGGER_PREFIX = String.format("[%s] ", UserController.class.getSimpleName());
     private final UserQueryHandler userQueryHandler;
     private final UserCreatorCommand userCreatorCommand;
-    private final UserPartialUpdateCommand userPartialUpdateCommand;
+    private final UserFieldUpdateCommand userPartialUpdateCommand;
     private final UserDeleteCommand userDeleteCommand;
     private final UserMapper userMapper;
 
     @GetMapping
-    public Flux<UserResponseDto> getUser() {
+    public Flux<UserResponseDto> getUsers() {
         return this.userQueryHandler.execute()
-                .doFirst(() -> log.info(LOGGER_PREFIX + "[getUser] request"))
-                .map(this.userMapper::toDto);
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[getUsers] request"))
+                .map(this.userMapper::toDto)
+                .doOnNext(userResponseDto -> log.info(LOGGER_PREFIX + "[getUsers] response {}", userResponseDto));
     }
 
     @PostMapping
@@ -54,10 +55,9 @@ public class UserController {
     }
 
     @PatchMapping
-    public Mono<Void> updateUserFields(@RequestBody final UserPartialUpdateRequestDto userPartialUpdateDto,
-                                       @RequestParam(value = "name") final String nameUser) {
-        return this.userPartialUpdateCommand.execute(this.userMapper.toModel(userPartialUpdateDto, nameUser))
-                .doFirst(() -> log.info(LOGGER_PREFIX + "[updateUser] request {}, {}", nameUser, userPartialUpdateDto))
+    public Mono<Void> updateUserFieldsByEmail(@RequestBody final UserFieldUpdateRequestDto userFieldUpdateRequestDto) {
+        return this.userPartialUpdateCommand.execute(this.userMapper.toModel(userFieldUpdateRequestDto))
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[updateUser] request {}", userFieldUpdateRequestDto))
                 .doOnSuccess(voidFlow ->
                         log.info(LOGGER_PREFIX + "[updateUser] response void"));
     }
