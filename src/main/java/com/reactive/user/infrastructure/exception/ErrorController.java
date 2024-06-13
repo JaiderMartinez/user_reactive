@@ -27,14 +27,24 @@ public class ErrorController {
 
     @ExceptionHandler(CoreException.class)
     public Mono<ResponseEntity<ErrorResponseDto>> handlerCoreException(final CoreException coreException) {
-        return Mono.just(this.buildErrorResponseEntity(coreException.getCodeException()));
+        return Mono.just(coreException)
+                .flatMap(coreExceptionS -> {
+                    final CodeException codeException = coreException.getCodeException();
+                    final ErrorResponseDto errorResponseDto = ErrorResponseDto.builder()
+                            .code(codeException.name())
+                            .message(coreExceptionS.getMessage())
+                            .build();
+                    final HttpStatus status = HTTP_STATUS_BY_CODE_EXCEPTION
+                            .getOrDefault(codeException, HttpStatus.NOT_EXTENDED);
+                    return Mono.just(new ResponseEntity<>(errorResponseDto, status));
+                });
     }
 
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<ErrorResponseDto>> handlerException(final Exception exception) {
-        log.error(LOGGER_PREFIX + "[handlerException] {}", exception.getMessage(), exception);
         return Mono.just(CodeException.DB_INTERNAL)
-                .doFirst(() -> log.error(LOGGER_PREFIX + "[handlerException] {}", exception.getMessage(), exception))
+                .doOnNext(codeException -> log
+                        .error(LOGGER_PREFIX + "[handlerException] {}", exception.getMessage(), exception))
                 .flatMap(codeException -> Mono.just(this.buildErrorResponseEntity(codeException)));
     }
 
@@ -42,8 +52,6 @@ public class ErrorController {
     public Mono<ResponseEntity<ErrorResponseDto>> handlerUncategorizedMongoDbException(
             final UncategorizedMongoDbException uncategorizedMongoDbException) {
         return Mono.just(CodeException.DB_INTERNAL)
-                .doFirst(() -> log.error(LOGGER_PREFIX + "[handlerUncategorizedMongoDbException] {}",
-                        uncategorizedMongoDbException.getMessage(), uncategorizedMongoDbException))
                 .flatMap(codeException -> Mono.just(this.buildErrorResponseEntity(codeException)));
     }
 
