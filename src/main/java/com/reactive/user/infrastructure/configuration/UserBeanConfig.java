@@ -2,7 +2,7 @@ package com.reactive.user.infrastructure.configuration;
 
 import com.reactive.user.application.command.UserCreatorCommand;
 import com.reactive.user.application.command.UserDeleteCommand;
-import com.reactive.user.application.command.UserPartialUpdateCommand;
+import com.reactive.user.application.command.UserFieldUpdateCommand;
 import com.reactive.user.application.query.UserQueryHandler;
 import com.reactive.user.application.service.UserService;
 import com.reactive.user.application.usecase.UserUseCase;
@@ -27,8 +27,8 @@ public class UserBeanConfig {
     }
 
     @Bean
-    public UserPartialUpdateCommand userPartialUpdateCommand(final UserUseCase userUseCase) {
-        return new UserPartialUpdateCommand(userUseCase);
+    public UserFieldUpdateCommand userPartialUpdateCommand(final UserUseCase userUseCase) {
+        return new UserFieldUpdateCommand(userUseCase);
     }
 
     @Bean

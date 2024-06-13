@@ -7,11 +7,11 @@ import reactor.core.publisher.Mono;
 public interface UserService {
     Flux<User> getUsers();
 
-    Mono<User> saveUser(final User user);
+    Mono<User> saveUser(User user);
 
-    Mono<Boolean> existEmail(final String email);
+    Mono<Boolean> existEmail(String email);
 
-    Mono<User> getUserByName(final String nameUser);
+    Mono<User> getUserByEmail(String email);
 
-    Mono<Void> deleteUser(final String nameUser, final String email);
+    Mono<Void> deleteUserByNameAndEmail(String nameUser, String email);
 }

@@ -1,7 +1,8 @@
 package com.reactive.user.infrastructure.dto.request;
 
-public record UserPartialUpdateRequestDto(
+public record UserFieldUpdateRequestDto(
         String email,
+        String name,
         String phone,
         String address
 ) {

@@ -5,9 +5,9 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Mono;
 
 public interface UserDao extends ReactiveMongoRepository<UserEntity, Long> {
-    Mono<Boolean> existsByEmail(final String email);
+    Mono<Boolean> existsByEmail(String email);
 
-    Mono<UserEntity> findByName(final String name);
+    Mono<UserEntity> findByEmail(String email);
 
-    Mono<Void> deleteByNameAndEmail(final String name, final String email);
+    Mono<Void> deleteByNameAndEmail(String name, String email);
 }

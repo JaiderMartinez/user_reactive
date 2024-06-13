@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
-public class UserPartialUpdateCommand {
+public class UserFieldUpdateCommand {
     private final UserUseCase userUseCase;
 
     public Mono<Void> execute(final User user) {
-        return this.userUseCase.updateUserFields(user);
+        return this.userUseCase.updateUserFieldsByEmail(user);
     }
 }
