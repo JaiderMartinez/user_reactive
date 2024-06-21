@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
-public class UserCreatorCommand {
+public class UpdateFieldUserCommand {
     private final UserUseCase userUseCase;
 
-    public Mono<User> execute(final User user) {
-        return this.userUseCase.saveUser(user);
+    public Mono<Void> execute(final User user) {
+        return this.userUseCase.updateUserFieldsByEmail(user);
     }
 }

@@ -22,10 +22,8 @@ public class MongoDBRepositoryImpl implements UserService {
 
     @Override
     public Flux<User> getUsers() {
-        return Flux.defer(() -> {
-                    log.info(LOGGER_PREFIX + "[getUsers] request");
-                    return this.userDao.findAll();
-                })
+        return this.userDao.findAll()
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[getUsers] request"))
                 .doOnNext(userEntityResponse -> log.info(LOGGER_PREFIX + "[getUsers] response {}", userEntityResponse))
                 .map(this.userMapper::toModel);
 
@@ -65,10 +63,8 @@ public class MongoDBRepositoryImpl implements UserService {
 
     @Override
     public Mono<Void> deleteUserByNameAndEmail(final String nameUser, final String email) {
-        return Mono.defer(() -> {
-                    log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email);
-                    return this.userDao.deleteByNameAndEmail(nameUser, email);
-                })
+        return this.userDao.deleteByNameAndEmail(nameUser, email)
+                .doFirst(() -> log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email))
                 .doOnSuccess(voidFlow -> log.info(LOGGER_PREFIX + "[deleteUser] response void"));
     }
 }

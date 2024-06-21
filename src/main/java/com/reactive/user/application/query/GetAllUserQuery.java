@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 
 @RequiredArgsConstructor
-public class UserQueryHandler {
+public class GetAllUserQuery {
     private final UserUseCase userUseCase;
 
     public Flux<User> execute() {

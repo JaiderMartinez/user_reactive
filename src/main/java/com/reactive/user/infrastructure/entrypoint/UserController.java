@@ -1,9 +1,9 @@
 package com.reactive.user.infrastructure.entrypoint;
 
-import com.reactive.user.application.command.UserCreatorCommand;
-import com.reactive.user.application.command.UserDeleteCommand;
-import com.reactive.user.application.command.UserFieldUpdateCommand;
-import com.reactive.user.application.query.UserQueryHandler;
+import com.reactive.user.application.command.CreateUserCommand;
+import com.reactive.user.application.command.DeleteUserCommand;
+import com.reactive.user.application.command.UpdateFieldUserCommand;
+import com.reactive.user.application.query.GetAllUserQuery;
 import com.reactive.user.infrastructure.dto.request.UserFieldUpdateRequestDto;
 import com.reactive.user.infrastructure.dto.request.UserRequestDto;
 import com.reactive.user.infrastructure.dto.response.UserCreatedResponseDto;
@@ -30,15 +30,15 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserController {
     private static final String LOGGER_PREFIX = String.format("[%s] ", UserController.class.getSimpleName());
-    private final UserQueryHandler userQueryHandler;
-    private final UserCreatorCommand userCreatorCommand;
-    private final UserFieldUpdateCommand userPartialUpdateCommand;
-    private final UserDeleteCommand userDeleteCommand;
+    private final GetAllUserQuery getAllUserQuery;
+    private final CreateUserCommand createUserCommand;
+    private final UpdateFieldUserCommand updateFieldUserCommand;
+    private final DeleteUserCommand deleteUserCommand;
     private final UserMapper userMapper;
 
     @GetMapping
     public Flux<UserResponseDto> getUsers() {
-        return this.userQueryHandler.execute()
+        return this.getAllUserQuery.execute()
                 .doFirst(() -> log.info(LOGGER_PREFIX + "[getUsers] request"))
                 .map(this.userMapper::toDto)
                 .doOnNext(userResponseDto -> log.info(LOGGER_PREFIX + "[getUsers] response {}", userResponseDto));
@@ -47,7 +47,7 @@ public class UserController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public Mono<UserCreatedResponseDto> saveUser(@RequestBody final UserRequestDto userRequestDto) {
-        return this.userCreatorCommand.execute(this.userMapper.toModel(userRequestDto))
+        return this.createUserCommand.execute(this.userMapper.toModel(userRequestDto))
                 .doFirst(() -> log.info(LOGGER_PREFIX + "[saveUser] request {}", userRequestDto))
                 .map(this.userMapper::toCreatedResponseDto)
                 .doOnSuccess(userCreatedResponseDto ->
@@ -56,7 +56,7 @@ public class UserController {
 
     @PatchMapping
     public Mono<Void> updateUserFieldsByEmail(@RequestBody final UserFieldUpdateRequestDto userFieldUpdateRequestDto) {
-        return this.userPartialUpdateCommand.execute(this.userMapper.toModel(userFieldUpdateRequestDto))
+        return this.updateFieldUserCommand.execute(this.userMapper.toModel(userFieldUpdateRequestDto))
                 .doFirst(() -> log.info(LOGGER_PREFIX + "[updateUser] request {}", userFieldUpdateRequestDto))
                 .doOnSuccess(voidFlow ->
                         log.info(LOGGER_PREFIX + "[updateUser] response void"));
@@ -65,7 +65,7 @@ public class UserController {
     @DeleteMapping
     public Mono<Void> deleteUser(@RequestParam(value = "name") final String nameUser,
                                  @RequestParam(value = "email") final String email) {
-        return this.userDeleteCommand.execute(nameUser, email)
+        return this.deleteUserCommand.execute(nameUser, email)
                 .doFirst(() -> log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email))
                 .doOnSuccess(voidFlow ->
                         log.info(LOGGER_PREFIX + "[deleteUser] response void"));
