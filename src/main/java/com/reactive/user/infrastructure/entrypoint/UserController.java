@@ -56,8 +56,9 @@ public class UserController {
 
     @PatchMapping
     public Mono<Void> updateUserFieldsByEmail(@RequestBody final UserFieldUpdateRequestDto userFieldUpdateRequestDto) {
-        return this.updateFieldUserCommand.execute(this.userMapper.toModel(userFieldUpdateRequestDto))
-                .doFirst(() -> log.info(LOGGER_PREFIX + "[updateUser] request {}", userFieldUpdateRequestDto))
+        return Mono.just(this.userMapper.toModel(userFieldUpdateRequestDto))
+                .doOnNext(userModel -> log.info(LOGGER_PREFIX + "[updateUser] request {}", userFieldUpdateRequestDto))
+                .flatMap(this.updateFieldUserCommand::execute)
                 .doOnSuccess(voidFlow ->
                         log.info(LOGGER_PREFIX + "[updateUser] response void"));
     }

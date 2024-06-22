@@ -7,6 +7,7 @@ import com.reactive.user.infrastructure.dto.request.UserRequestDto;
 import com.reactive.user.infrastructure.dto.response.UserCreatedResponseDto;
 import com.reactive.user.infrastructure.dto.response.UserResponseDto;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper
 public interface UserMapper {
@@ -18,6 +19,7 @@ public interface UserMapper {
 
     User toModel(UserRequestDto userRequestDto);
 
+    @Mapping(target = "id", ignore = true)
     User toModel(UserFieldUpdateRequestDto userFieldUpdateRequestDto);
 
     UserEntity toEntity(User user);

@@ -64,24 +64,13 @@ public class UserUseCase {
         return this.userService.existEmail(email);
     }
 
-    public Mono<Void> updateUserFields(final User userWithValueNews) {
-        return this.userService.getUserByName(userWithValueNews.name())
-                .flatMap(userToUpdate -> this.getObjectUserWithFieldsUpdate(userToUpdate, userWithValueNews))
-                .flatMap(userNew -> this.userService.saveUser(userNew)
-                        .then(Mono.empty()));
-    }
-
-    private Mono<User> getObjectUserWithFieldsUpdate(final User userToUpdate, final User userWithValueNews) {
-        return Mono.just(
-                userToUpdate.toBuilder()
-                        .email(userWithValueNews.email())
-                        .phone(userWithValueNews.phone())
-                        .address(userWithValueNews.address())
-                        .build()
-        );
+    public Mono<Void> updateUserFieldsByEmail(final User userWithValueNews) {
+        return this.userService.getUserByEmail(userWithValueNews.email())
+                .map(userToUpdate -> userToUpdate.createUserWithUpdatedFields(userWithValueNews))
+                .flatMap(userNew -> this.userService.saveUser(userNew).then());
     }
 
     public Mono<Void> deleteUser(final String nameUser, final String email) {
-        return this.userService.deleteUser(nameUser, email);
+        return this.userService.deleteUserByNameAndEmail(nameUser, email);
     }
 }

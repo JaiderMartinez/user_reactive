@@ -2,7 +2,7 @@ package com.reactive.user.infrastructure.dto.request;
 
 import lombok.Builder;
 
-@Builder
+@Builder(toBuilder = true)
 public record UserRequestDto(
         String email,
         String name,

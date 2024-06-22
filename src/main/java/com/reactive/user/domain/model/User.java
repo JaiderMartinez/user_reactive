@@ -25,4 +25,12 @@ public record User(
     public boolean isValidPhone() {
         return this.phone != null && this.phone.length() == PHONE_LENGTH;
     }
+
+    public User createUserWithUpdatedFields(final User userWithValueNews) {
+        return this.toBuilder()
+                .name(userWithValueNews.name())
+                .phone(userWithValueNews.phone())
+                .address(userWithValueNews.address())
+                .build();
+    }
 }
