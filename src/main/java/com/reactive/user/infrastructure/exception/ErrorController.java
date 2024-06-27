@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.MissingRequestValueException;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -42,9 +43,9 @@ public class ErrorController {
 
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<ErrorResponseDto>> handlerException(final Exception exception) {
-        return Mono.just(CodeException.DB_INTERNAL)
-                .doOnNext(codeException -> log
-                        .error(LOGGER_PREFIX + "[handlerException] {}", exception.getMessage(), exception))
+        return Mono.just(CodeException.INTERNAL_SERVER_ERROR)
+                .doOnNext(codeException ->
+                        log.error(LOGGER_PREFIX + "[handlerException] {}", exception.getMessage(), exception))
                 .flatMap(codeException -> Mono.just(this.buildErrorResponseEntity(codeException)));
     }
 
@@ -55,10 +56,26 @@ public class ErrorController {
                 .flatMap(codeException -> Mono.just(this.buildErrorResponseEntity(codeException)));
     }
 
-    private ResponseEntity<ErrorResponseDto> buildErrorResponseEntity(final CodeException codeException) {
+    @ExceptionHandler(MissingRequestValueException.class)
+    public Mono<ResponseEntity<ErrorResponseDto>> handlerMissingRequestValueException(
+            final MissingRequestValueException missingRequestValueException) {
+        return Mono.just(CodeException.INVALID_PARAMETERS)
+                .doOnNext(codeException ->
+                        log.error(LOGGER_PREFIX + "[handlerMissingRequestValueException] {}",
+                                missingRequestValueException.getMessage(), missingRequestValueException))
+                .flatMap(codeException -> {
+                    final String paramName = missingRequestValueException.getName();
+                    return Mono.just(this.buildErrorResponseEntity(codeException, paramName));
+                });
+    }
+
+    private ResponseEntity<ErrorResponseDto> buildErrorResponseEntity(final CodeException codeException, final String... fields) {
+        final String messageException = fields.length > 0
+                ? String.format(codeException.getMessage(), (Object[]) fields)
+                : codeException.getMessage();
         final ErrorResponseDto errorResponseDto = ErrorResponseDto.builder()
                 .code(codeException.name())
-                .message(codeException.getMessage())
+                .message(messageException)
                 .build();
         final HttpStatus status = HTTP_STATUS_BY_CODE_EXCEPTION
                 .getOrDefault(codeException, HttpStatus.NOT_EXTENDED);

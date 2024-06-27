@@ -17,6 +17,7 @@ public interface UserMapper {
 
     User toModel(UserEntity userEntity);
 
+    @Mapping(target = "id", ignore = true)
     User toModel(UserRequestDto userRequestDto);
 
     @Mapping(target = "id", ignore = true)
