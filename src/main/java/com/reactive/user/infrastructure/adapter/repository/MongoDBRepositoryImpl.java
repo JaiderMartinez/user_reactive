@@ -5,6 +5,7 @@ import com.reactive.user.application.service.UserService;
 import com.reactive.user.domain.exception.CodeException;
 import com.reactive.user.domain.model.User;
 import com.reactive.user.infrastructure.adapter.dao.UserDao;
+import com.reactive.user.infrastructure.adapter.entity.UserEntity;
 import com.reactive.user.infrastructure.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,21 +51,33 @@ public class MongoDBRepositoryImpl implements UserService {
     public Mono<User> getUserByEmail(final String email) {
         return Mono.just(email)
                 .doOnNext(emailRequest -> log.info(LOGGER_PREFIX + "[getUserByEmail] request {}", emailRequest))
-                .flatMap(this.userDao::findByEmail)
-                .switchIfEmpty(
-                        Mono.error(() -> {
-                            log.error(LOGGER_PREFIX + "[getUserByEmail] No users found");
-                            return new RepositoryException(CodeException.USER_NOT_FOUND, null);
-                        })
-                )
-                .doOnSuccess(emailResponse -> log.info(LOGGER_PREFIX + "[getUserByEmail] response {}", emailResponse))
+                .flatMap(this::findUserByEmail)
                 .map(this.userMapper::toModel);
+    }
+
+    private Mono<UserEntity> findUserByEmail(final String email) {
+        return this.userDao.findByEmail(email)
+                .doOnNext(user -> log.info(LOGGER_PREFIX + "[findUserByEmail] response {}", user))
+                .switchIfEmpty(this.handleUserNotFound());
+    }
+
+    private Mono<UserEntity> handleUserNotFound() {
+        return Mono.error(() -> {
+            log.error(LOGGER_PREFIX + "[handleUserNotFound] user not found");
+            return new RepositoryException(CodeException.USER_NOT_FOUND, null);
+        });
     }
 
     @Override
     public Mono<Void> deleteUserByNameAndEmail(final String nameUser, final String email) {
+        return Mono.defer(() -> {
+            log.info(LOGGER_PREFIX + "[deleteUserByNameAndEmail] request {}, {}", nameUser, email);
+            return this.deleteByNameAndEmail(nameUser, email);
+        });
+    }
+
+    private Mono<Void> deleteByNameAndEmail(final String nameUser, final String email) {
         return this.userDao.deleteByNameAndEmail(nameUser, email)
-                .doFirst(() -> log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email))
-                .doOnSuccess(voidFlow -> log.info(LOGGER_PREFIX + "[deleteUser] response void"));
+                .doOnSuccess(valueNull -> log.info(LOGGER_PREFIX + "[deleteByNameAndEmail] response void"));
     }
 }

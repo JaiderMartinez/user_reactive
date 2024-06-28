@@ -68,7 +68,6 @@ public class UserController {
                                  @RequestParam(value = "email") final String email) {
         return this.deleteUserCommand.execute(nameUser, email)
                 .doFirst(() -> log.info(LOGGER_PREFIX + "[deleteUser] request {}, {}", nameUser, email))
-                .doOnSuccess(voidFlow ->
-                        log.info(LOGGER_PREFIX + "[deleteUser] response void"));
+                .doOnSuccess(valueNull -> log.info(LOGGER_PREFIX + "[deleteUser] response void"));
     }
 }
