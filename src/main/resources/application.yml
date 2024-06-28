@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: user
+  data:
+    mongodb:
+      database: ${DB_NAME}
+      uri: ${DB_CONNECTION_URL}
